@@ -201,7 +201,7 @@ details.appx[open] { padding-bottom:16px; }
 </ul>
 </details>
 
-<details class="appx" id="appendix-b"><summary><h2>Appendix B — Data behind the charts</h2></summary>
+<details class="appx" id="appendix-b"><summary><h2>Appendix B — Additional charts and underlying data</h2></summary>
 
 <h4>B1. Weekly signups and signup → paid conversion (section 1)</h4>
 <p class="note-foot">Complete Monday–Sunday weeks only. Free CRM launched Wednesday Apr 1, inside the week of Mar 30.</p>
@@ -229,19 +229,7 @@ details.appx[open] { padding-bottom:16px; }
 <p class="note-foot">Direct triples in June (26K sessions) while its session-to-signup rate drops to 1.3%; likely a tracking or bot issue worth checking at the source.</p>
 </details>
 
-<details class="appx" id="appendix-c"><summary><h2>Appendix C — Reconciliation with the finance view</h2></summary>
-<p>Finance counts customers by the month the deal closed; this analysis counts them by the month the customer signed up. The monthly numbers differ but tell the same story. January close-month counts are low because some January closes come from December signups, which aren't in the data.</p>
-<div class="tbl"><table class=""><thead><tr><th>Close month</th><th>Paying customers</th><th>All closed opps (incl. $0)</th><th>New deal value</th></tr></thead><tbody><tr><td>Jan</td><td>168</td><td>173</td><td>$8,955</td></tr><tr><td>Feb</td><td>313</td><td>318</td><td>$16,580</td></tr><tr><td>Mar</td><td>316</td><td>322</td><td>$15,485</td></tr><tr><td>Apr</td><td>228</td><td>235</td><td>$11,880</td></tr><tr><td>May</td><td>177</td><td>181</td><td>$10,095</td></tr><tr><td>Jun</td><td>161</td><td>164</td><td>$9,385</td></tr><tr><td>Jul</td><td>102</td><td>102</td><td>$5,670</td></tr></tbody></table></div>
-<p class="note-foot">July closes come from June signups (the opportunity extract runs to Jul 26). Includes 15 opportunities whose lead_id doesn't match any signup.</p>
-</details>
 
-<details class="appx" id="appendix-d"><summary><h2>Appendix D — Queries</h2></summary>
-<p>Every number in this document comes from two SQL files in the <a href="https://github.com/northwind-acv/sfdc-plg-panel">project repo</a>. How the data was validated and cleaned is in <a href="data-methodology.html">Data methodology</a>.</p>
-<ul>
-  <li><a href="https://github.com/northwind-acv/sfdc-plg-panel/blob/main/sql/01_clean.sql">01_clean.sql</a>: cleaning rules and the analysis base table</li>
-  <li><a href="https://github.com/northwind-acv/sfdc-plg-panel/blob/main/sql/02_funnel.sql">02_funnel.sql</a>: weekly and monthly funnel, SKU split, slices, finance view</li>
-</ul>
-</details>
 </main>
 <div id="tip" role="tooltip"></div>
 <script>
