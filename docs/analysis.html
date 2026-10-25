@@ -30,7 +30,7 @@
 }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
-main { max-width:860px; margin:0 auto; padding:48px 16px 96px; }
+main { max-width:980px; margin:0 auto; padding:48px 16px 96px; }
 a { color:var(--accent); }
 nav.crumbs { font-size:14px; color:var(--muted); margin-bottom:24px; }
 h1 { font-size:30px; line-height:1.2; letter-spacing:-0.01em; margin:0 0 6px; }
@@ -55,8 +55,8 @@ ol.findings > li { margin-bottom:16px; }
 figure { margin:24px 0 32px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px 18px 12px; }
 figcaption .t { font-weight:600; font-size:15px; }
 figcaption .s { color:var(--fg2); font-size:14px; margin-top:2px; }
-figure svg { width:100%; height:auto; display:block; margin-top:12px; overflow:visible; }
-.legend { display:flex; flex-wrap:wrap; gap:14px; font-size:13px; color:var(--fg2); margin-top:10px; }
+figure svg { width:100%; max-width:760px; height:auto; display:block; margin:12px auto 0; overflow:visible; }
+.legend { display:flex; flex-wrap:wrap; justify-content:center; gap:14px; font-size:13px; color:var(--fg2); margin-top:10px; }
 .legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
 .note-foot { font-size:13px; color:var(--fg2); margin-top:8px; }
 svg .grid { stroke:var(--line); stroke-width:1; }
