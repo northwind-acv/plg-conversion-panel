@@ -1,5 +1,5 @@
 -- 02_funnel.sql
--- Joins the clean tables into signup_outcomes and builds the funnel tables used in the analysis.
+-- Queries to join the cleaned datasets for analysis
 -- Runs on top of 01_clean.sql.
 
 

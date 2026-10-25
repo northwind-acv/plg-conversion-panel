@@ -1,5 +1,5 @@
 -- 01_clean.sql
--- Cleans the three raw tables: sessions, signups and opportunities.
+-- Queries to clean the raw datasets (sessions, signups, opportunities)
 --
 -- Data fixes:
 -- R1   sessions       channel written 12 ways             -> standardized to 7 channels    (1,284 rows)
