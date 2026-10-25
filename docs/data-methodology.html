@@ -181,6 +181,8 @@ code { font-family:ui-monospace,Menlo,monospace; font-size:0.9em; }
   <li><b>Anything inside the product.</b> Sessions are website visits; there are no product logins or usage events. We can't measure activation, which is critical when promoting a free plan.</li>
   <li><b>Upgrades after 30 days.</b> No deal closes more than 29 days after signup, for any SKU, even for April cohorts with ~85 days of history. Either Free CRM users decide in their first month or the extract only captures the first 30 days. A freemium plan usually converts over a longer period, so it's worth confirming with the data owner whether the extract is capped at 30 days. This analysis assumes the data is complete as provided.</li>
   <li><b>Free CRM landing page before launch.</b> The Free CRM landing page URLs (<code>/lp/free-crm</code>, <code>/offers/free-crm/</code>) get traffic from January: 12,802 sessions in Q1 (10% of Q1 traffic), producing 249 Starter and Pro signups before the product existed. The same happens with <code>/campaign/spring-2026</code>. It could be a teaser page, a reused URL or an artifact of the extract. Left as is: we can't tell which version is right, and no finding depends on it.</li>
+  <li><b>Seats at win.</b> Every Starter deal is $35 and every Pro deal is $110, as if every customer bought the same thing. We can't see how many seats or licenses each customer bought, so deal value can't capture differences in deal size.</li>
+  <li><b>Pricing model.</b> The data doesn't say whether pricing is per seat, flat or something else, or whether amounts are monthly or annual.</li>
 </ul>
 
 <h2>7. Reproduce it</h2>
