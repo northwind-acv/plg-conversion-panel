@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northwind CRM — Data methodology</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg:#f9f9f7; --surface:#fcfcfb; --fg:#0b0b0b; --fg2:#52514e; --muted:#898781;
+  --line:#e1e0d9; --axis:#c3c2b7; --accent:#1c5cab; --callout:#eef4fc;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --ink-total:#6b6a66;
+  --pos:#2a78d6; --neg:#e34948; --q1:#a9a8a2; --q2:#2a78d6; --bar-neutral:#b9b8b1; --track:#e4e3dd;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --bg:#0d0d0d; --surface:#1a1a19; --fg:#f0efec; --fg2:#c3c2b7; --muted:#898781;
+    --line:#2c2c2a; --axis:#383835; --accent:#86b6ef; --callout:#16202c;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --ink-total:#8a8984;
+    --pos:#3987e5; --neg:#e66767; --q1:#6b6a66; --q2:#3987e5; --bar-neutral:#5a5955; --track:#2e2e2c;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg:#0d0d0d; --surface:#1a1a19; --fg:#f0efec; --fg2:#c3c2b7; --muted:#898781;
+  --line:#2c2c2a; --axis:#383835; --accent:#86b6ef; --callout:#16202c;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --ink-total:#8a8984;
+  --pos:#3987e5; --neg:#e66767; --q1:#6b6a66; --q2:#3987e5; --bar-neutral:#5a5955; --track:#2e2e2c;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+main { max-width:1040px; margin:0 auto; padding:48px 16px 96px; }
+a { color:var(--accent); }
+nav.crumbs { font-size:14px; color:var(--muted); margin-bottom:24px; }
+h1 { font-size:30px; line-height:1.2; letter-spacing:-0.01em; margin:0 0 6px; }
+.date { color:var(--muted); font-size:14px; margin-bottom:28px; }
+h2 { font-size:22px; margin:56px 0 12px; padding-top:20px; border-top:1px solid var(--line); }
+h3 { font-size:17px; margin:36px 0 6px; }
+h4 { font-size:15px; margin:28px 0 8px; }
+p, li { max-width:80ch; }
+.tldr { font-size:18px; line-height:1.55; }
+.tiles { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:28px 0; }
+.tile { background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+.tile .l { font-size:13px; color:var(--fg2); }
+.tile .v { font-size:24px; font-weight:600; margin-top:4px; }
+.tile .v .q { font-size:15px; font-weight:500; color:var(--fg2); }
+.tile .d { font-size:13px; color:var(--fg2); margin-top:2px; }
+@media (max-width:640px) { .tiles { grid-template-columns:repeat(2,1fr); } }
+.callout { background:var(--callout); border-radius:10px; padding:14px 18px; margin:24px 0; font-size:15px; }
+.callout b { display:block; margin-bottom:2px; }
+ol.findings > li { margin-bottom:16px; }
+.hyp li { margin-bottom:6px; }
+.verdict { font-size:13px; font-weight:600; padding:2px 8px; border-radius:999px; border:1px solid var(--line); margin-left:6px; white-space:nowrap; }
+figure { margin:24px 0 32px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px 18px 12px; }
+figcaption .t { font-weight:600; font-size:15px; }
+figcaption .s { color:var(--fg2); font-size:14px; margin-top:2px; }
+figure svg { width:100%; height:auto; display:block; margin-top:12px; overflow:visible; }
+.legend { display:flex; flex-wrap:wrap; gap:14px; font-size:13px; color:var(--fg2); margin-top:10px; }
+.legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
+.note-foot { font-size:13px; color:var(--fg2); margin-top:8px; }
+svg .grid { stroke:var(--line); stroke-width:1; }
+svg .axis { stroke:var(--axis); stroke-width:1; }
+svg .tick { fill:var(--muted); font-size:11px; font-variant-numeric:tabular-nums; }
+svg .val { fill:var(--fg2); font-size:12px; font-weight:600; }
+svg .end { fill:var(--fg2); font-size:12px; }
+svg .lab { fill:var(--fg2); font-size:12px; }
+svg .hdr { fill:var(--fg); font-size:12px; font-weight:600; }
+svg .note { fill:var(--muted); font-size:11px; }
+svg .marker { stroke:var(--axis); stroke-width:1; }
+svg .halo { paint-order:stroke; stroke:var(--surface); stroke-width:4px; stroke-linejoin:round; font-weight:600; }
+svg .axt { fill:var(--fg2); font-size:11px; font-weight:600; }
+svg .launch { stroke:var(--fg2); stroke-width:1.5; stroke-dasharray:4 4; }
+svg .conn { stroke:var(--muted); stroke-width:1; }
+svg .bar-conn { stroke:var(--axis); stroke-width:2; }
+svg .ln { stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
+svg .ln.blended { stroke-dasharray:5 4; }
+svg .dot { stroke:var(--surface); stroke-width:2; }
+svg [data-tip] { cursor:default; }
+svg [data-tip]:hover { opacity:.85; }
+#tip { position:fixed; pointer-events:none; background:var(--fg); color:var(--bg); font-size:12px; padding:6px 9px; border-radius:6px; max-width:300px; opacity:0; transition:opacity .08s; z-index:10; }
+.tbl { overflow-x:auto; margin:12px 0 20px; }
+table { border-collapse:collapse; width:100%; font-size:14px; font-variant-numeric:tabular-nums; }
+th, td { padding:7px 10px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap; }
+th { font-size:12px; color:var(--fg2); font-weight:600; vertical-align:bottom; }
+th:first-child, td:first-child { text-align:left; }
+table.num th, table.num td { font-size:12.5px; padding:6px 7px; }
+table.kit td:nth-child(3), table.kit th:nth-child(3) { text-align:left; color:var(--fg2); }
+.sw { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:7px; }
+details { margin:12px 0; }
+summary { cursor:pointer; font-weight:600; }
+pre { background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:14px; overflow-x:auto; font-size:12.5px; line-height:1.5; }
+.gloss li { margin-bottom:6px; }
+.pending { border:1px dashed var(--axis); border-radius:10px; padding:16px 18px; color:var(--fg2); }
+sup a { text-decoration:none; }
+
+table.txt th, table.txt td { text-align:left; white-space:normal; vertical-align:top; }
+table.rules td { white-space:normal; vertical-align:top; text-align:left; font-size:13.5px; }
+table.rules td:last-child { white-space:nowrap; text-align:right; }
+table.rules td:nth-child(3) { min-width:280px; } table.rules td:nth-child(4) { min-width:220px; }
+.joinmap { display:flex; align-items:stretch; gap:0; margin:20px 0; flex-wrap:wrap; }
+.jbox { flex:1 1 200px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+.jbox .n { font-weight:600; } .jbox .g { color:var(--fg2); font-size:13px; }
+.jarrow { flex:0 0 120px; display:flex; flex-direction:column; justify-content:center; align-items:center; font-size:12px; color:var(--fg2); text-align:center; }
+.jarrow span { font-family:ui-monospace,Menlo,monospace; color:var(--fg); }
+.jarrow i { display:block; width:100%; height:1px; background:var(--axis); margin:6px 0; position:relative; }
+.jarrow i:after { content:""; position:absolute; right:0; top:-4px; border:4px solid transparent; border-left:6px solid var(--axis); }
+@media (max-width:640px) { .jarrow { flex-basis:100%; padding:8px 0; } }
+
+.two { display:grid; grid-template-columns:1fr 1fr; gap:24px; } @media (max-width:640px) { .two { grid-template-columns:1fr; } }
+code { font-family:ui-monospace,Menlo,monospace; font-size:0.9em; }
+</style>
+</head>
+<body>
+<main>
+<nav class="crumbs"><a href="./">Northwind CRM case</a> / Data methodology</nav>
+<h1>Data methodology</h1>
+<div class="date">How the tables were understood, validated, cleaned and joined · Companion to the <a href="analysis.html">Analysis</a></div>
+
+<p class="tldr">We got three raw extracts and no data dictionary. The tables join cleanly on ids (99%+ match rates), but they needed 14 fixes before we could trust them: duplicates, broken keys, amounts recorded 1,000× too high, a sign bug in days to close, out-of-range dates and messy labels. Under 1% of rows needed a fix (not counting URL normalization, which applies to every visit). Every rule is in SQL and every count on this page is queried from the data.</p>
+
+<h2>1. What each table is</h2>
+<div class="tbl"><table class="txt"><thead><tr><th>Table</th><th>One row is</th><th>Key</th><th>Rows raw → clean</th><th>Date range</th></tr></thead><tbody><tr><td><b>sessions</b></td><td>A website visit</td><td><code>session_id</code></td><td>307,715 → 307,715</td><td>Jan 1 – Jun 30, 2026</td></tr><tr><td><b>signups</b></td><td>A lead signing up for one product</td><td><code>lead_id</code></td><td>7,408 → 7,338</td><td>Jan 1 – Jul 8, 2026*</td></tr><tr><td><b>opportunities</b></td><td>A closed deal (paid plan)</td><td><code>opp_id</code></td><td>1,513 → 1,495</td><td>Jan 2 – Jul 26, 2026</td></tr></tbody></table></div>
+<p class="note-foot">* 8 signups are dated in July, after sessions end on Jun 30. Corrected in R7.</p>
+<p>There's no dictionary, so this is our read of each field from the values, and what we checked to confirm it:</p>
+<div class="tbl"><table class="txt"><thead><tr><th>Table</th><th>Field</th><th>What it means (inferred)</th></tr></thead><tbody><tr><td><code>sessions</code></td><td><code>session_id</code></td><td>Unique visit id. Joins to signups.session_id.</td></tr><tr><td><code>sessions</code></td><td><code>visitor_id</code></td><td>Visitor (cookie-level) id; 190,631 distinct, 300 null. A visitor can have many sessions.</td></tr><tr><td><code>sessions</code></td><td><code>event_dt</code></td><td>Visit date.</td></tr><tr><td><code>sessions</code></td><td><code>mktg_channel</code></td><td>Marketing channel of the visit. 12 raw labels that are really 7 channels (casing / trailing spaces).</td></tr><tr><td><code>sessions</code></td><td><code>geo, device_type</code></td><td>Country bucket and device of the visit.</td></tr><tr><td><code>sessions</code></td><td><code>entry_url</code></td><td>Landing page. 135 raw URLs that are really ~20 pages (case, trailing slash, query string, geo prefix).</td></tr><tr><td><code>sessions</code></td><td><code>converted_flag</code></td><td>1 if the visit produced a signup. 7,338 sessions flagged; every matched signup's session has flag = 1.</td></tr><tr><td><code>signups</code></td><td><code>lead_id</code></td><td>Unique lead id. Joins to opportunities.lead_id.</td></tr><tr><td><code>signups</code></td><td><code>visitor_id, session_id</code></td><td>The visitor and the session the signup happened in (last touch).</td></tr><tr><td><code>signups</code></td><td><code>created_dt</code></td><td>Signup date. Same day as its session in 100% of matched rows after cleaning.</td></tr><tr><td><code>signups</code></td><td><code>mktg_channel, geo</code></td><td>Copied from the signup session (agree with sessions in ~100% of rows).</td></tr><tr><td><code>signups</code></td><td><code>product_code</code></td><td>Product signed up for: <code>STR</code> Starter trial, <code>PRO</code> Pro trial, <code>FCRM</code> Free CRM (from Apr 1).</td></tr><tr><td><code>signups</code></td><td><code>company_size</code></td><td>Employee count, self-reported. Has sentinels (−5, 999,999).</td></tr><tr><td><code>opportunities</code></td><td><code>opp_id, lead_id</code></td><td>Closed deal and the lead it came from; at most 1 opportunity per lead.</td></tr><tr><td><code>opportunities</code></td><td><code>close_dt</code></td><td>Date the deal closed (customer started paying).</td></tr><tr><td><code>opportunities</code></td><td><code>plan, amount</code></td><td>Plan purchased and monthly price: Starter $35, Pro $110 (stable all period). Some $0 rows.</td></tr><tr><td><code>opportunities</code></td><td><code>days_to_close</code></td><td>Days from signup to close. Range 1–29 after fixing a sign bug.</td></tr></tbody></table></div>
+
+<h2>2. How the tables connect</h2>
+<div class="joinmap">
+  <div class="jbox"><div class="n">sessions</div><div class="g">307,715 website visits</div></div>
+  <div class="jarrow"><span>session_id</span><i></i>1 : 0..1</div>
+  <div class="jbox"><div class="n">signups</div><div class="g">7,338 leads, one product each</div></div>
+  <div class="jarrow"><span>lead_id</span><i></i>1 : 0..1</div>
+  <div class="jbox"><div class="n">opportunities</div><div class="g">1,495 closed deals</div></div>
+</div>
+<p>The first instinct with three separate extracts is to line them up by date. We don't need to: the ids connect them row by row, which lets us follow each signup from the visit that produced it to the deal it became. That's what makes the plan and origin cuts in the analysis possible.</p>
+<div class="tbl"><table class="txt"><thead><tr><th>Check</th><th>Result</th><th>Read</th></tr></thead><tbody><tr><td>Signups that find their session</td><td>7,313 / 7,338 (99.7%)</td><td>25 have malformed session ids (R8)</td></tr><tr><td>Matched signup sessions with converted_flag = 1</td><td>7,313 / 7,313 (100%)</td><td>Confirms what converted_flag means</td></tr><tr><td>Flagged sessions with no signup</td><td>25</td><td>Same count as the malformed signup keys: the other side of the same break</td></tr><tr><td>Signup on the same day as its session</td><td>7,313 / 7,313 (100%)</td><td>After R7. No attribution window needed</td></tr><tr><td>visitor_id agrees between tables</td><td>7,310 / 7,313 (99.96%)</td><td>3 mismatches; not used for joins</td></tr><tr><td>Channel agrees between tables</td><td>7,313 / 7,313 (100.0%)</td><td>After R1</td></tr><tr><td>Geo agrees between tables</td><td>7,265 / 7,265 (100.0%)</td><td>Where both sides are known (R14)</td></tr><tr><td>Opportunities that find their lead</td><td>1,480 / 1,495 (99.0%)</td><td>15 have malformed lead ids (R13)</td></tr><tr><td>Opportunities per lead</td><td>max 1</td><td>1:1, no fan-out on join</td></tr><tr><td>Deals closed before their signup</td><td>0</td><td>After R7 and R12</td></tr></tbody></table></div>
+
+<h3>Signup product vs plan bought</h3>
+<p><code>product_code</code> (what the lead signed up for) and <code>plan</code> (what they bought) are different fields. Free CRM is not a plan you buy; its upgrades show up as Starter deals.</p>
+<div class="two"><div class="tbl"><table class=""><thead><tr><th>Signed up for</th><th>Bought</th><th>Deals</th></tr></thead><tbody><tr><td>FCRM</td><td>Starter</td><td>134</td></tr><tr><td>PRO</td><td>Pro</td><td>361</td></tr><tr><td>STR</td><td>Starter</td><td>985</td></tr></tbody></table></div><div class="tbl"><table class=""><thead><tr><th>Plan</th><th>Amount (after R10)</th><th>Deals</th></tr></thead><tbody><tr><td>Pro</td><td>$0.0</td><td>8</td></tr><tr><td>Pro</td><td>$110.0</td><td>357</td></tr><tr><td>Starter</td><td>$0.0</td><td>22</td></tr><tr><td>Starter</td><td>$35.0</td><td>1,108</td></tr></tbody></table></div></div>
+<p class="note-foot">Counts include $0 deals. Prices didn't change during the period, so this is a packaging change, not a pricing change.</p>
+
+<h2>3. Cleaning rules</h2>
+<p>Each rule is numbered in <a href="https://github.com/northwind-acv/plg-conversion-panel/blob/main/sql/01_clean.sql">01_clean.sql</a> with the same id. Rows are flagged rather than dropped when they're still useful for some cuts.</p>
+<div class="tbl"><table class="rules"><thead><tr><th>Rule</th><th>Table</th><th>Issue found</th><th>Treatment</th><th>Affected</th></tr></thead><tbody><tr><td><b>R1</b></td><td>sessions</td><td>Channel labels in 12 variants (<code>'Display '</code>, <code>'direct'</code>, <code>'Organic search'</code>)</td><td>Trim + map to the 7 canonical channels</td><td>1,284 rows relabeled</td></tr><tr><td><b>R2</b></td><td>sessions</td><td>entry_url has 135 raw values: mixed case, trailing slashes, <code>?gclid</code> / <code>utm</code> params, geo prefixes (<code>/uk/</code>, <code>/in/</code>)</td><td>Normalize URL, then map to 7 page types (content, home, pricing, product, Free CRM LP, trial LP, campaign LP)</td><td>135 raw URLs → 7 types</td></tr><tr><td><b>R3</b></td><td>sessions</td><td>visitor_id missing</td><td>Keep (session metrics are fine); flag</td><td>300 rows flagged</td></tr><tr><td><b>R4</b></td><td>signups</td><td>Exact duplicate rows</td><td>Drop</td><td>66 rows dropped</td></tr><tr><td><b>R5</b></td><td>signups</td><td>company_size sentinels: −5 and 999,999</td><td>Set to NULL; analyze in buckets, never averages</td><td>30 rows nulled</td></tr><tr><td><b>R6</b></td><td>signups</td><td>Same lead_id twice with conflicting geo / company_size</td><td>Keep the most complete row</td><td>4 leads deduplicated</td></tr><tr><td><b>R7</b></td><td>signups</td><td>created_dt in July, outside the window. Each one's session is in the window, and every other signup happens the same day as its session</td><td>Replace with the session date</td><td>8 dates corrected</td></tr><tr><td><b>R8</b></td><td>signups</td><td>session_id doesn't exist in sessions (format <code>S9xxxxxxx</code>)</td><td>Keep for signup → paid metrics; excluded only from origin cuts</td><td>25 rows flagged</td></tr><tr><td><b>R9</b></td><td>opportunities</td><td>Exact duplicate rows</td><td>Drop</td><td>18 rows dropped</td></tr><tr><td><b>R10</b></td><td>opportunities</td><td>Amount 1,000× list price (35,000 / 110,000)</td><td>Divide by 1,000 (unit error)</td><td>6 amounts fixed</td></tr><tr><td><b>R11</b></td><td>opportunities</td><td>Amount = $0 (closed but not paying: coupon, comp or internal)</td><td>Exclude from paying customers; sensitivity shown with them included</td><td>30 deals flagged</td></tr><tr><td><b>R12</b></td><td>opportunities</td><td>Negative days_to_close; the absolute value equals the true date gap</td><td>Recompute from dates</td><td>10 values fixed</td></tr><tr><td><b>R13</b></td><td>opportunities</td><td>lead_id doesn't exist in signups (format <code>G9xxxxxx</code>). Implied signup dates fall inside the window, so these are broken keys, not pre-January leads</td><td>Keep in the finance (close date) view; excluded from cohort conversion</td><td>15 deals flagged</td></tr><tr><td><b>R14</b></td><td>signups</td><td>geo holds the literal text <code>'N/A'</code> (in addition to true NULLs)</td><td>Set to NULL</td><td>25 rows nulled</td></tr></tbody></table></div>
+
+<h3>Checking R7: were the July dates really wrong?</h3>
+<p>Two of the eight leads with July signup dates have a closed deal. In both, the raw <code>days_to_close</code> only makes sense if the signup happened on the session date, not in July. One of them closed in March, which would be before its own signup.</p>
+<div class="tbl"><table class=""><thead><tr><th>Lead</th><th>Raw created_dt</th><th>Corrected (session date)</th><th>Deal closed</th><th>days_to_close (raw)</th></tr></thead><tbody><tr><td><code>G0001922</code></td><td>Jul 6</td><td>Feb 23</td><td>Mar 8</td><td>13</td></tr><tr><td><code>G0006974</code></td><td>Jul 4</td><td>Jun 23</td><td>Jul 5</td><td>12</td></tr></tbody></table></div>
+
+<h3>R2: landing pages after normalizing</h3>
+<div class="tbl"><table class=""><thead><tr><th>Page type</th><th>Sessions</th></tr></thead><tbody><tr><td>content</td><td>88,635</td></tr><tr><td>home</td><td>63,353</td></tr><tr><td>product</td><td>48,281</td></tr><tr><td>pricing</td><td>40,767</td></tr><tr><td>free_crm_lp</td><td>33,349</td></tr><tr><td>campaign_lp</td><td>22,309</td></tr><tr><td>trial_lp</td><td>11,021</td></tr></tbody></table></div>
+
+<h2>4. Definitions</h2>
+<ul>
+  <li><b>Paying customer (win):</b> an opportunity with amount &gt; $0, closed within 30 days of the signup. We call it "paying customer" because finance defines a customer as a closed opportunity, and $0 deals don't pay.</li>
+  <li><b>Cohort:</b> signups grouped by the month they signed up. Conversion is always cohort-based (signup month → did they pay), not close-month based.</li>
+  <li><b>Periods:</b> Q1 = Jan–Mar 2026 (before Free CRM), Q2 = Apr–Jun 2026 (after launch). Compared as monthly averages.</li>
+  <li><b>Plan:</b> the product the lead signed up for (<code>product_code</code>), not the plan they bought.</li>
+  <li><b>Origin attributes</b> (channel, entry page, device): from the signup session, i.e. last touch. 37% of signups had earlier visits; we don't attribute to those.</li>
+  <li><b>New vs returning:</b> returning = the visitor had a session on an earlier day than the signup.</li>
+</ul>
+
+<h2>5. Assumptions and why they're safe</h2>
+<ul>
+  <li><b>30-day window.</b> No deal in the extract closes more than 29 days after signup, so a 30-day window loses nothing. Opportunities run to Jul 26; the 166 signups after Jun 26 have a slightly shorter window. With a 29-day maximum, the impact is a handful of deals in late June.</li>
+  <li><b>$0 deals excluded.</b> 30 of 1,495 deals, spread evenly across months. Including them doesn't change any trend (see the finance view in the analysis).</li>
+  <li><b>Orphan rows kept, not invented.</b> We don't guess the true keys of the 25 signups and 15 deals with broken ids. They stay in the totals they can support and out of the cuts they can't.</li>
+  <li><b>January in the finance view.</b> Some January closes come from December signups, which aren't in the data, so January close-month counts are low. Cohort views aren't affected.</li>
+  <li><b>Free CRM in the decomposition.</b> Free CRM has no Q1 conversion rate. The Kitagawa split uses its Q2 rate for both periods, which puts its whole effect in the mix term.</li>
+</ul>
+
+<h2>6. What the data can't tell us</h2>
+<ul>
+  <li><b>Anything inside the product.</b> Sessions are website visits; there are no product logins or usage events. We can't measure activation.</li>
+  <li><b>Upgrades after 30 days.</b> No deal closes more than 29 days after signup, for any SKU, even for April cohorts with ~85 days of history. Either Free CRM users decide in their first month or the extract only captures the first 30 days. A freemium plan usually converts over a longer period, so Free CRM's lifetime conversion could be higher than what we observe.</li>
+  <li><b>Free CRM landing page before launch.</b> The Free CRM landing page URLs (<code>/lp/free-crm</code>, <code>/offers/free-crm/</code>) get traffic from January: 12,802 sessions in Q1 (10% of Q1 traffic), producing 249 Starter and Pro signups before the product existed. The same happens with <code>/campaign/spring-2026</code>. It could be a teaser page, a reused URL or an artifact of the extract. Left as is: we can't tell which version is right, and no finding depends on it.</li>
+  <li><b>Multi-touch attribution.</b> Only the signup session is linked to the lead.</li>
+  <li><b>Direct traffic in June.</b> Direct jumps to 37% of sessions and its signup rate halves. Probably tracking or bots; worth checking at the source.</li>
+</ul>
+
+<h2>7. Reproduce it</h2>
+<p>The queries are written in Snowflake SQL and avoid engine-specific functions, so they also run unchanged in <a href="https://duckdb.org">DuckDB</a> on a laptop. In Snowflake, run 01, 02 and 03 against the <code>sessions</code>, <code>signups</code> and <code>opportunities</code> tables. Locally, run <code>00_load_raw.sql</code> first to load the CSVs into tables with those same names. Run from the folder that contains <code>data/</code>.</p>
+<pre>duckdb northwind.duckdb &lt; sql/00_load_raw.sql
+duckdb northwind.duckdb &lt; sql/01_clean.sql
+duckdb northwind.duckdb &lt; sql/02_funnel.sql
+duckdb northwind.duckdb &lt; sql/03_decomposition.sql</pre>
+<details><summary>00_load_raw.sql — load the CSVs (local only)</summary><pre>-- =====================================================================
+-- 00_load_raw.sql  —  LOCAL ONLY (DuckDB)
+-- In Snowflake, skip this file: sessions, signups and opportunities
+-- already exist as tables. Locally, this creates them from the CSVs.
+-- Run from the folder that contains the data/ subfolder.
+-- =====================================================================
+
+CREATE OR REPLACE TABLE sessions      AS SELECT * FROM read_csv_auto(&#x27;data/sessions.csv&#x27;);
+CREATE OR REPLACE TABLE signups       AS SELECT * FROM read_csv_auto(&#x27;data/signups.csv&#x27;);
+CREATE OR REPLACE TABLE opportunities AS SELECT * FROM read_csv_auto(&#x27;data/opportunities.csv&#x27;);</pre></details>
+<details><summary>01_clean.sql — cleaning rules and analysis base table</summary><pre>-- =====================================================================
+-- 01_clean.sql — Clean the three raw tables and join them
+-- Snowflake SQL (also runs in DuckDB). Rule ids R1–R14 match the
+-- Data methodology doc. Flags are 1/0 so they can be summed and averaged.
+--
+-- WHAT WE HAD TO FIX SO THE DATA IS USABLE
+-- (applied in 01_clean.sql; 02 and 03 only read the cleaned tables)
+--
+-- | Rule | Table         | Problem found                               | What we did                         | Rows   |
+-- |------|---------------|---------------------------------------------|-------------------------------------|--------|
+-- | R1   | sessions      | Same channel written 12 ways (&quot;direct &quot;)    | Map to 7 channel names              | 1,284  |
+-- | R2   | sessions      | 135 URL spellings of ~20 pages              | Clean URL, group into 7 page types  | all    |
+-- | R3   | sessions      | Visit with no visitor id                    | Keep, mark is_visitor_missing       | 300    |
+-- | R4   | signups       | Exact duplicate rows                        | Remove                              | 66     |
+-- | R5   | signups       | Fake company sizes (-5, 999,999)            | Set to unknown                      | 30     |
+-- | R6   | signups       | Same lead twice with different details      | Keep the most complete row          | 4 leads|
+-- | R7   | signups       | Signup dated July, after the data ends      | Use the date of its visit           | 8      |
+-- | R8   | signups       | Points to a visit that doesn&#x27;t exist        | Keep, mark is_session_orphan        | 25     |
+-- | R9   | opportunities | Exact duplicate rows                        | Remove                              | 18     |
+-- | R10  | opportunities | Amount 1,000x the price (35,000 / 110,000)  | Divide by 1,000                     | 6      |
+-- | R11  | opportunities | $0 deals (nobody pays)                      | Keep, mark is_zero_amount; not wins | 30     |
+-- | R12  | opportunities | Negative days_to_close (sign bug)           | Recompute from the dates            | 10     |
+-- | R13  | opportunities | Points to a lead that doesn&#x27;t exist         | Keep, mark is_lead_orphan           | 15     |
+-- | R14  | signups       | Country written as the text &#x27;N/A&#x27;           | Set to unknown                      | 25     |
+--
+-- =====================================================================
+
+
+-- ---------------------------------------------------------------------
+-- STEP 1. sessions_clean — one row per website visit
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE TABLE sessions_clean AS
+WITH with_clean_url AS (
+    SELECT
+        s.*,
+        -- R2. Make the URL comparable. Read it inside-out:
+        --   1) cut everything after &quot;?&quot;         /pricing?plan=starter -&gt; /pricing
+        --   2) lowercase                        /HOME -&gt; /home
+        --   3) drop the country prefix          /uk/blog/x -&gt; /blog/x
+        --   4) drop the trailing slash          /pricing/ -&gt; /pricing
+        --   5) if nothing is left, it was &quot;/&quot;   (the home page)
+        COALESCE(
+            NULLIF(
+                REGEXP_REPLACE(
+                    REGEXP_REPLACE(LOWER(SPLIT_PART(s.entry_url, &#x27;?&#x27;, 1)),
+                                   &#x27;^/(uk|in|de|au|ca)(/|$)&#x27;, &#x27;/&#x27;),
+                    &#x27;/+$&#x27;, &#x27;&#x27;),
+                &#x27;&#x27;),
+            &#x27;/&#x27;) AS url_clean
+    FROM sessions s
+)
+SELECT
+    session_id,
+    visitor_id,
+    CAST(event_dt AS DATE) AS event_dt,
+
+    -- R1. Same channel written different ways (&quot;Display &quot;, &quot;direct&quot;) -&gt; one name
+    CASE LOWER(TRIM(mktg_channel))
+        WHEN &#x27;direct&#x27;         THEN &#x27;Direct&#x27;
+        WHEN &#x27;display&#x27;        THEN &#x27;Display&#x27;
+        WHEN &#x27;email&#x27;          THEN &#x27;Email&#x27;
+        WHEN &#x27;organic search&#x27; THEN &#x27;Organic Search&#x27;
+        WHEN &#x27;paid search&#x27;    THEN &#x27;Paid Search&#x27;
+        WHEN &#x27;referral&#x27;       THEN &#x27;Referral&#x27;
+        WHEN &#x27;social&#x27;         THEN &#x27;Social&#x27;
+    END AS mktg_channel,
+
+    geo,
+    device_type,
+    entry_url,
+
+    -- R2. Group the clean URL into 7 page types
+    CASE
+        WHEN url_clean LIKE &#x27;/blog%&#x27;    OR url_clean LIKE &#x27;/resources%&#x27; THEN &#x27;content&#x27;
+        WHEN url_clean IN (&#x27;/&#x27;, &#x27;/home&#x27;, &#x27;/index&#x27;)                      THEN &#x27;home&#x27;
+        WHEN url_clean LIKE &#x27;/pricing%&#x27; OR url_clean LIKE &#x27;/plans%&#x27;     THEN &#x27;pricing&#x27;
+        WHEN url_clean IN (&#x27;/offers/free-crm&#x27;, &#x27;/lp/free-crm&#x27;)          THEN &#x27;free_crm_lp&#x27;
+        WHEN url_clean = &#x27;/get/starter-trial&#x27;                           THEN &#x27;trial_lp&#x27;
+        WHEN url_clean IN (&#x27;/go/crm&#x27;, &#x27;/campaign/spring-2026&#x27;)          THEN &#x27;campaign_lp&#x27;
+        WHEN url_clean LIKE &#x27;/product%&#x27; OR url_clean LIKE &#x27;/features%&#x27;  THEN &#x27;product&#x27;
+        ELSE &#x27;other&#x27;
+    END AS page_type,
+
+    converted_flag,
+
+    -- R3. 300 visits have no visitor id. Keep them, just mark them.
+    CASE WHEN visitor_id IS NULL THEN 1 ELSE 0 END AS is_visitor_missing
+FROM with_clean_url;
+
+
+-- ---------------------------------------------------------------------
+-- STEP 2. signups_clean — one row per lead
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE TABLE signups_clean AS
+WITH no_duplicates AS (
+    -- R4. Remove rows that are exact copies of another row
+    SELECT DISTINCT * FROM signups
+),
+fixed_values AS (
+    SELECT
+        lead_id,
+        visitor_id,
+        session_id,
+        CAST(created_dt AS DATE) AS created_dt,
+        mktg_channel,
+        product_code,
+        -- R14. The text &#x27;N/A&#x27; is not a country -&gt; treat it as unknown
+        NULLIF(TRIM(geo), &#x27;N/A&#x27;) AS geo,
+        -- R5. -5 or 999,999 employees are not real -&gt; treat as unknown
+        CASE WHEN company_size &lt; 1 OR company_size &gt;= 999999 THEN NULL
+             ELSE company_size END AS company_size
+    FROM no_duplicates
+),
+ranked AS (
+    -- R6. A few leads appear twice with different details.
+    -- Score each row by how complete it is (0, 1 or 2 known fields)
+    -- and number the rows of each lead from most to least complete.
+    SELECT
+        f.*,
+        ROW_NUMBER() OVER (
+            PARTITION BY lead_id
+            ORDER BY (CASE WHEN geo IS NOT NULL THEN 1 ELSE 0 END)
+                   + (CASE WHEN company_size IS NOT NULL THEN 1 ELSE 0 END) DESC
+        ) AS row_rank
+    FROM fixed_values f
+)
+SELECT
+    r.lead_id,
+    r.visitor_id,
+    r.session_id,
+
+    -- R7. 8 signups are dated in July, after the data ends. Every signup
+    -- happens on the same day as its visit, so use the visit date instead.
+    CASE WHEN r.created_dt &gt; DATE &#x27;2026-06-30&#x27; AND s.event_dt IS NOT NULL
+         THEN s.event_dt
+         ELSE r.created_dt END AS created_dt,
+    CASE WHEN r.created_dt &gt; DATE &#x27;2026-06-30&#x27; AND s.event_dt IS NOT NULL
+         THEN 1 ELSE 0 END AS is_date_fixed,
+
+    r.mktg_channel,
+    r.product_code,
+    CASE r.product_code
+        WHEN &#x27;STR&#x27;  THEN &#x27;Starter&#x27;
+        WHEN &#x27;PRO&#x27;  THEN &#x27;Pro&#x27;
+        WHEN &#x27;FCRM&#x27; THEN &#x27;Free CRM&#x27;
+    END AS product,
+    r.geo,
+    r.company_size,
+
+    -- R8. 25 signups point to a visit that doesn&#x27;t exist (broken id).
+    -- Keep them, just mark them.
+    CASE WHEN s.session_id IS NULL THEN 1 ELSE 0 END AS is_session_orphan
+FROM ranked r
+LEFT JOIN sessions_clean s
+       ON s.session_id = r.session_id
+WHERE r.row_rank = 1;          -- keep only the most complete row per lead
+
+
+-- ---------------------------------------------------------------------
+-- STEP 3. opportunities_clean — one row per closed deal
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE TABLE opportunities_clean AS
+WITH no_duplicates AS (
+    -- R9. Remove rows that are exact copies of another row
+    SELECT DISTINCT * FROM opportunities
+)
+SELECT
+    o.opp_id,
+    o.lead_id,
+    CAST(o.close_dt AS DATE) AS close_dt,
+    o.plan,
+
+    -- R10. 35,000 and 110,000 are the list prices x1000 (unit error)
+    CASE WHEN o.amount IN (35000, 110000) THEN o.amount / 1000
+         ELSE o.amount END AS amount,
+
+    -- R11. $0 deals closed but nobody pays -&gt; not a paying customer
+    CASE WHEN o.amount = 0 THEN 1 ELSE 0 END AS is_zero_amount,
+
+    -- R12. Some days_to_close are negative (sign bug).
+    -- Recompute from the dates; if the lead is missing, flip the sign.
+    COALESCE(CAST(o.close_dt AS DATE) - g.created_dt,
+             ABS(o.days_to_close)) AS days_to_close,
+
+    -- R13. 15 deals point to a lead that doesn&#x27;t exist (broken id).
+    -- Keep them, just mark them.
+    CASE WHEN g.lead_id IS NULL THEN 1 ELSE 0 END AS is_lead_orphan
+FROM no_duplicates o
+LEFT JOIN signups_clean g
+       ON g.lead_id = o.lead_id;
+
+
+-- ---------------------------------------------------------------------
+-- STEP 4. signup_outcomes — one row per signup, everything we need
+-- to analyze it: where it came from, which SKU, and did it pay
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE TABLE signup_outcomes AS
+WITH first_visit AS (
+    -- The first day each visitor came to the site
+    SELECT visitor_id, MIN(event_dt) AS first_visit_dt
+    FROM sessions_clean
+    WHERE visitor_id IS NOT NULL
+    GROUP BY visitor_id
+),
+paid_deals AS (
+    -- Only deals where someone actually pays
+    SELECT * FROM opportunities_clean WHERE is_zero_amount = 0
+)
+SELECT
+    g.*,
+
+    -- Cohort = the month the lead signed up
+    CAST(DATE_TRUNC(&#x27;month&#x27;, g.created_dt) AS DATE) AS signup_month,
+    CASE WHEN g.created_dt &lt; DATE &#x27;2026-04-01&#x27; THEN &#x27;Q1&#x27; ELSE &#x27;Q2&#x27; END AS period,
+
+    -- Where the signup came from (its visit)
+    s.device_type,
+    s.page_type,
+    CASE WHEN fv.first_visit_dt &lt; g.created_dt THEN &#x27;Returning&#x27; ELSE &#x27;New&#x27; END AS visitor_type,
+    CASE
+        WHEN g.company_size IS NULL THEN &#x27;Unknown&#x27;
+        WHEN g.company_size &lt;= 10   THEN &#x27;1-10&#x27;
+        WHEN g.company_size &lt;= 50   THEN &#x27;11-50&#x27;
+        WHEN g.company_size &lt;= 200  THEN &#x27;51-200&#x27;
+        ELSE &#x27;201+&#x27;
+    END AS company_size_bucket,
+
+    -- The deal it turned into, if any
+    o.plan   AS won_plan,
+    o.amount AS won_amount,
+    o.days_to_close,
+
+    -- THE WIN DEFINITION: a paying deal closed within 30 days of signup.
+    -- 1 = paying customer, 0 = not. Summing this column counts wins.
+    CASE WHEN o.opp_id IS NOT NULL AND o.days_to_close &lt;= 30 THEN 1 ELSE 0 END AS is_win
+FROM signups_clean g
+LEFT JOIN sessions_clean s ON s.session_id = g.session_id
+LEFT JOIN first_visit fv   ON fv.visitor_id = g.visitor_id
+LEFT JOIN paid_deals o     ON o.lead_id = g.lead_id;</pre></details>
+<details><summary>02_funnel.sql — funnel, plan split, slices, finance view</summary><pre>-- =====================================================================
+-- 02_funnel.sql — Funnel metrics on the cleaned data
+-- Snowflake SQL (also runs in DuckDB). Run after 01_clean.sql.
+-- Win = paying deal (amount &gt; $0) closed within 30 days of signup.
+--
+-- WHAT WE HAD TO FIX SO THE DATA IS USABLE
+-- (applied in 01_clean.sql; 02 and 03 only read the cleaned tables)
+--
+-- | Rule | Table         | Problem found                               | What we did                         | Rows   |
+-- |------|---------------|---------------------------------------------|-------------------------------------|--------|
+-- | R1   | sessions      | Same channel written 12 ways (&quot;direct &quot;)    | Map to 7 channel names              | 1,284  |
+-- | R2   | sessions      | 135 URL spellings of ~20 pages              | Clean URL, group into 7 page types  | all    |
+-- | R3   | sessions      | Visit with no visitor id                    | Keep, mark is_visitor_missing       | 300    |
+-- | R4   | signups       | Exact duplicate rows                        | Remove                              | 66     |
+-- | R5   | signups       | Fake company sizes (-5, 999,999)            | Set to unknown                      | 30     |
+-- | R6   | signups       | Same lead twice with different details      | Keep the most complete row          | 4 leads|
+-- | R7   | signups       | Signup dated July, after the data ends      | Use the date of its visit           | 8      |
+-- | R8   | signups       | Points to a visit that doesn&#x27;t exist        | Keep, mark is_session_orphan        | 25     |
+-- | R9   | opportunities | Exact duplicate rows                        | Remove                              | 18     |
+-- | R10  | opportunities | Amount 1,000x the price (35,000 / 110,000)  | Divide by 1,000                     | 6      |
+-- | R11  | opportunities | $0 deals (nobody pays)                      | Keep, mark is_zero_amount; not wins | 30     |
+-- | R12  | opportunities | Negative days_to_close (sign bug)           | Recompute from the dates            | 10     |
+-- | R13  | opportunities | Points to a lead that doesn&#x27;t exist         | Keep, mark is_lead_orphan           | 15     |
+-- | R14  | signups       | Country written as the text &#x27;N/A&#x27;           | Set to unknown                      | 25     |
+--
+-- =====================================================================
+
+
+-- ---------------------------------------------------------------------
+-- STEP 1. monthly_funnel — the whole funnel by signup month
+-- visits -&gt; signups -&gt; paying customers -&gt; deal value
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE TABLE monthly_funnel AS
+WITH visits_by_month AS (
+    SELECT CAST(DATE_TRUNC(&#x27;month&#x27;, event_dt) AS DATE) AS month,
+           COUNT(*) AS sessions
+    FROM sessions_clean
+    GROUP BY 1
+),
+signups_by_month AS (
+    SELECT signup_month AS month,
+           COUNT(*)                     AS signups,
+           SUM(is_win)                  AS wins_30d,          -- is_win is 1/0, so SUM counts wins
+           SUM(is_win * won_amount)     AS deal_value_30d     -- amount only counts for wins
+    FROM signup_outcomes
+    GROUP BY 1
+)
+SELECT
+    month,
+    sessions,
+    signups,
+    wins_30d,
+    deal_value_30d,
+    ROUND(100.0 * signups  / sessions, 2) AS sess_to_signup_pct,
+    ROUND(100.0 * wins_30d / signups, 1)  AS signup_to_win_pct,
+    ROUND(100.0 * wins_30d / sessions, 2) AS sess_to_win_pct
+FROM visits_by_month
+JOIN signups_by_month USING (month)
+ORDER BY month;
+
+
+-- ---------------------------------------------------------------------
+-- STEP 2. weekly_funnel — same idea, by week (weeks start on Monday)
+-- Only full 7-day weeks: Jan 1-4 and Jun 29-30 are cut off.
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE TABLE weekly_funnel AS
+SELECT
+    CAST(DATE_TRUNC(&#x27;week&#x27;, created_dt) AS DATE)             AS week_start,
+    COUNT(*)                                                 AS signups,
+    SUM(CASE WHEN product = &#x27;Free CRM&#x27; THEN 1 ELSE 0 END)    AS free_crm_signups,
+    SUM(is_win)                                              AS wins_30d,
+    ROUND(100.0 * AVG(is_win), 1)                            AS signup_to_win_pct   -- average of 1/0 = conversion rate
+FROM signup_outcomes
+GROUP BY 1
+HAVING MAX(created_dt) - MIN(created_dt) = 6                 -- Monday to Sunday = 6 days apart
+ORDER BY 1;
+
+
+-- ---------------------------------------------------------------------
+-- STEP 3. product_funnel — the funnel split by SKU, per month
+-- mix_pct = this SKU&#x27;s share of the month&#x27;s signups
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE TABLE product_funnel AS
+SELECT
+    signup_month AS month,
+    product,
+    COUNT(*)                                     AS signups,
+    -- window function: divide by the total signups of the same month
+    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (PARTITION BY signup_month), 1) AS mix_pct,
+    SUM(is_win)                                  AS wins_30d,
+    ROUND(100.0 * AVG(is_win), 1)                AS signup_to_win_pct,
+    SUM(is_win * won_amount)                     AS deal_value_30d
+FROM signup_outcomes
+GROUP BY signup_month, product
+ORDER BY month, product;
+
+
+-- ---------------------------------------------------------------------
+-- STEP 4. slice_conversion — conversion for every origin slice
+-- Trick: stack the table 6 times (one per dimension) with UNION ALL,
+-- so a single GROUP BY gives every slice at once.
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE TABLE slice_conversion AS
+WITH stacked AS (
+    SELECT signup_month, period, is_win, product,
+           &#x27;channel&#x27; AS dimension, mktg_channel AS value
+    FROM signup_outcomes
+    UNION ALL
+    SELECT signup_month, period, is_win, product,
+           &#x27;entry_page&#x27;, page_type
+    FROM signup_outcomes
+    UNION ALL
+    SELECT signup_month, period, is_win, product,
+           &#x27;device&#x27;, device_type
+    FROM signup_outcomes
+    UNION ALL
+    SELECT signup_month, period, is_win, product,
+           &#x27;visitor_type&#x27;, visitor_type
+    FROM signup_outcomes
+    UNION ALL
+    SELECT signup_month, period, is_win, product,
+           &#x27;company_size&#x27;, company_size_bucket
+    FROM signup_outcomes
+    UNION ALL
+    SELECT signup_month, period, is_win, product,
+           &#x27;geo&#x27;, COALESCE(geo, &#x27;Unknown&#x27;)
+    FROM signup_outcomes
+)
+SELECT
+    dimension,
+    value,
+    signup_month AS month,
+    period,
+    COUNT(*)                        AS signups,
+    SUM(is_win)                     AS wins_30d,
+    ROUND(100.0 * AVG(is_win), 1)   AS signup_to_win_pct,
+    ROUND(100.0 * AVG(CASE WHEN product = &#x27;Free CRM&#x27; THEN 1 ELSE 0 END), 1)
+                                    AS free_crm_share_pct
+FROM stacked
+WHERE value IS NOT NULL            -- the 25 signups with no visit have no page/device
+GROUP BY dimension, value, signup_month, period
+ORDER BY dimension, value, month;
+
+
+-- ---------------------------------------------------------------------
+-- STEP 5. finance_view — customers by the month the deal CLOSED
+-- (how finance counts). Includes the 15 deals with a broken lead id.
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE TABLE finance_view AS
+SELECT
+    CAST(DATE_TRUNC(&#x27;month&#x27;, close_dt) AS DATE)            AS close_month,
+    SUM(CASE WHEN is_zero_amount = 0 THEN 1 ELSE 0 END)    AS paying_customers,
+    COUNT(*)                                               AS all_closed_opps,
+    SUM(amount)                                            AS deal_value
+FROM opportunities_clean
+GROUP BY 1
+ORDER BY 1;</pre></details>
+<details><summary>03_decomposition.sql — Kitagawa decomposition</summary><pre>-- =====================================================================
+-- 03_decomposition.sql — How much of the drop in paying customers
+-- comes from MORE SIGNUPS, a different SKU MIX, or CONVERSION changes
+-- Snowflake SQL (also runs in DuckDB). Run after 01_clean.sql.
+--
+-- WHAT WE HAD TO FIX SO THE DATA IS USABLE
+-- (applied in 01_clean.sql; 02 and 03 only read the cleaned tables)
+--
+-- | Rule | Table         | Problem found                               | What we did                         | Rows   |
+-- |------|---------------|---------------------------------------------|-------------------------------------|--------|
+-- | R1   | sessions      | Same channel written 12 ways (&quot;direct &quot;)    | Map to 7 channel names              | 1,284  |
+-- | R2   | sessions      | 135 URL spellings of ~20 pages              | Clean URL, group into 7 page types  | all    |
+-- | R3   | sessions      | Visit with no visitor id                    | Keep, mark is_visitor_missing       | 300    |
+-- | R4   | signups       | Exact duplicate rows                        | Remove                              | 66     |
+-- | R5   | signups       | Fake company sizes (-5, 999,999)            | Set to unknown                      | 30     |
+-- | R6   | signups       | Same lead twice with different details      | Keep the most complete row          | 4 leads|
+-- | R7   | signups       | Signup dated July, after the data ends      | Use the date of its visit           | 8      |
+-- | R8   | signups       | Points to a visit that doesn&#x27;t exist        | Keep, mark is_session_orphan        | 25     |
+-- | R9   | opportunities | Exact duplicate rows                        | Remove                              | 18     |
+-- | R10  | opportunities | Amount 1,000x the price (35,000 / 110,000)  | Divide by 1,000                     | 6      |
+-- | R11  | opportunities | $0 deals (nobody pays)                      | Keep, mark is_zero_amount; not wins | 30     |
+-- | R12  | opportunities | Negative days_to_close (sign bug)           | Recompute from the dates            | 10     |
+-- | R13  | opportunities | Points to a lead that doesn&#x27;t exist         | Keep, mark is_lead_orphan           | 15     |
+-- | R14  | signups       | Country written as the text &#x27;N/A&#x27;           | Set to unknown                      | 25     |
+--
+--
+-- THE IDEA (Kitagawa decomposition)
+--   Wins per month = Signups per month  x  Blended conversion
+--   Blended conversion = sum over SKUs of (SKU share of signups x SKU conversion)
+--
+--   Between Q1 and Q2 three things changed: signups, SKU mix and SKU conversion.
+--   We split the change in wins into three pieces, using the average of both
+--   periods for everything that is held still. The pieces add up exactly:
+--     VOLUME = change in signups              x  average blended conversion
+--     MIX    = average signups x change in SKU share   x average SKU conversion
+--     RATE   = average signups x average SKU share      x change in SKU conversion
+--
+-- ASSUMPTION: Free CRM didn&#x27;t exist in Q1, so it has no Q1 conversion.
+-- We use its Q2 conversion for both periods, which puts its whole effect in MIX.
+-- =====================================================================
+
+
+CREATE OR REPLACE TABLE kitagawa AS
+WITH sku_by_period AS (
+    -- Average signups and wins per month, for each period and SKU
+    SELECT period,
+           product,
+           COUNT(*) / 3.0    AS signups_mo,     -- 3 months per period
+           SUM(is_win) / 3.0 AS wins_mo
+    FROM signup_outcomes
+    GROUP BY period, product
+),
+all_combinations AS (
+    -- Every SKU in both periods, so Free CRM gets a Q1 row (with zeros)
+    SELECT p.period, k.product
+    FROM (VALUES (&#x27;Q1&#x27;), (&#x27;Q2&#x27;)) AS p(period)
+    CROSS JOIN (SELECT DISTINCT product FROM signup_outcomes) AS k
+),
+filled AS (
+    SELECT a.period,
+           a.product,
+           COALESCE(b.signups_mo, 0) AS signups_mo,
+           COALESCE(b.wins_mo, 0)    AS wins_mo
+    FROM all_combinations a
+    LEFT JOIN sku_by_period b
+           ON b.period = a.period AND b.product = a.product
+),
+shares_and_rates AS (
+    SELECT period,
+           product,
+           signups_mo / SUM(signups_mo) OVER (PARTITION BY period) AS mix,    -- SKU share of signups
+           wins_mo / NULLIF(signups_mo, 0)                         AS rate    -- SKU conversion (NULL if no signups)
+    FROM filled
+),
+side_by_side AS (
+    -- Q1 and Q2 next to each other, one row per SKU
+    SELECT q1.product,
+           q1.mix                       AS mix_q1,
+           q2.mix                       AS mix_q2,
+           COALESCE(q1.rate, q2.rate)   AS rate_q1,     -- the Free CRM assumption
+           q2.rate                      AS rate_q2
+    FROM shares_and_rates q1
+    JOIN shares_and_rates q2
+      ON q2.product = q1.product
+    WHERE q1.period = &#x27;Q1&#x27; AND q2.period = &#x27;Q2&#x27;
+),
+period_totals AS (
+    SELECT period,
+           SUM(signups_mo)                  AS n,       -- signups per month
+           SUM(wins_mo)                     AS w,       -- wins per month
+           SUM(wins_mo) / SUM(signups_mo)   AS r        -- blended conversion
+    FROM filled
+    GROUP BY period
+),
+t AS (
+    SELECT q1.n AS n1, q2.n AS n2, q1.w AS w1, q2.w AS w2, q1.r AS r1, q2.r AS r2
+    FROM period_totals q1
+    JOIN period_totals q2 ON q1.period = &#x27;Q1&#x27; AND q2.period = &#x27;Q2&#x27;
+)
+SELECT &#x27;Q1 wins / month&#x27; AS step, NULL AS product, w1 AS wins FROM t
+UNION ALL
+SELECT &#x27;Volume effect&#x27;, NULL, (n2 - n1) * (r1 + r2) / 2 FROM t
+UNION ALL
+SELECT &#x27;Mix effect&#x27;, s.product,
+       (t.n1 + t.n2) / 2 * (s.mix_q2 - s.mix_q1) * (s.rate_q1 + s.rate_q2) / 2
+FROM side_by_side s CROSS JOIN t
+UNION ALL
+SELECT &#x27;Rate effect&#x27;, s.product,
+       (t.n1 + t.n2) / 2 * (s.mix_q1 + s.mix_q2) / 2 * (s.rate_q2 - s.rate_q1)
+FROM side_by_side s CROSS JOIN t
+UNION ALL
+SELECT &#x27;Q2 wins / month&#x27;, NULL, w2 FROM t;
+
+
+-- The waterfall: one bar per effect. Volume + Mix + Rate = Q2 - Q1, exactly.
+SELECT step, ROUND(SUM(wins), 1) AS wins_per_month
+FROM kitagawa
+GROUP BY step
+ORDER BY CASE step WHEN &#x27;Q1 wins / month&#x27; THEN 1
+                   WHEN &#x27;Volume effect&#x27;   THEN 2
+                   WHEN &#x27;Mix effect&#x27;      THEN 3
+                   WHEN &#x27;Rate effect&#x27;     THEN 4
+                   ELSE 5 END;</pre></details>
+</main>
+</body>
+</html>
