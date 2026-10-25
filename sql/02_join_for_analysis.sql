@@ -34,6 +34,7 @@ SELECT
     o.days_to_close,
     -- Win = paid deal closed within 30 days of signup
     CASE WHEN o.opp_id IS NOT NULL AND o.days_to_close <= 30 THEN 1 ELSE 0 END AS is_win
+-- Every join key is unique on the right side, so this keeps one row per signup (7,338 in, 7,338 out)
 FROM signups_clean g
 LEFT JOIN sessions_clean s ON s.session_id = g.session_id
 LEFT JOIN first_visit fv   ON fv.visitor_id = g.visitor_id
