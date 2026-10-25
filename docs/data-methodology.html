@@ -111,6 +111,7 @@ table.rules td:nth-child(3) { min-width:280px; } table.rules td:nth-child(4) { m
 
 .two { display:grid; grid-template-columns:1fr 1fr; gap:24px; } @media (max-width:640px) { .two { grid-template-columns:1fr; } }
 code { font-family:ui-monospace,Menlo,monospace; font-size:0.9em; }
+h2.first { margin-top:32px; }
 </style>
 </head>
 <body>
@@ -119,7 +120,18 @@ code { font-family:ui-monospace,Menlo,monospace; font-size:0.9em; }
 <h1>Data methodology</h1>
 <div class="date">How I read, cleaned, checked and joined the data · Companion to the <a href="analysis.html">Analysis</a></div>
 
-<p class="tldr">The case came with three raw tables and no data dictionary. The tables join well on their ids (99%+ match), but they needed 14 fixes before I could trust them: duplicates, broken ids, amounts 1,000× too high, negative days to close, dates outside the period and messy labels. Less than 1% of rows needed a fix (not counting the URL cleanup, which touches every visit). Every fix is in SQL, and every number on this page comes from the data.</p>
+<h2 class="first">Approach</h2>
+<p>The VP's question was why paying customers are down while signups are up. Before touching the data, I restated it as something the data can answer: blended signup → paid conversion fell from 29% to 12% QoQ. Is that about who signs up, or about what they sign up for? That gave two hypotheses to test:</p>
+<ol>
+  <li><b>SKU mix.</b> Free CRM is taking signups that used to start a Starter or Pro trial, and it converts at a lower rate.</li>
+  <li><b>Signup quality.</b> Lower-quality signups convert worse, whatever SKU they choose.</li>
+</ol>
+<p>Then I worked the data to test them: cleaned the three tables, joined them into one row per signup and defined a paying customer (sections 1–4). To test the first, I compared the SKU mix over time and conversion within each SKU. To test the second, I compared conversion by channel, entry page, device, visitor type, company size and country. The results are in the <a href="analysis.html">Analysis</a>.</p>
+
+<h2>Data at a glance</h2>
+<p>The case came with three raw tables and no data dictionary. The tables join well on their ids (99%+ match), but they needed 14 fixes before I could trust them: duplicates, broken ids, amounts 1,000× too high, negative days to close, dates outside the period and messy labels. Less than 1% of rows needed a fix (not counting the URL cleanup, which touches every visit). Every fix is in SQL, and every number on this page comes from the data.</p>
+
+
 
 <h2>1. What each table is</h2>
 <div class="tbl"><table class="txt"><thead><tr><th>Table</th><th>One row is</th><th>Key</th><th>Rows raw → clean</th><th>Date range</th></tr></thead><tbody><tr><td><b>sessions</b></td><td>A website visit</td><td><code>session_id</code></td><td>307,715 → 307,715</td><td>Jan 1 – Jun 30, 2026</td></tr><tr><td><b>signups</b></td><td>A lead signing up for one product</td><td><code>lead_id</code></td><td>7,408 → 7,338</td><td>Jan 1 – Jul 8, 2026*</td></tr><tr><td><b>opportunities</b></td><td>A closed deal (paid plan)</td><td><code>opp_id</code></td><td>1,513 → 1,495</td><td>Jan 2 – Jul 26, 2026</td></tr></tbody></table></div>
