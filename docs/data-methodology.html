@@ -128,9 +128,9 @@ code { font-family:ui-monospace,Menlo,monospace; font-size:0.9em; }
 <h2>2. How the tables connect</h2>
 <div class="joinmap">
   <div class="jbox"><div class="n">sessions</div><div class="g">307,715 website visits</div></div>
-  <div class="jarrow"><span>session_id</span><i></i>1 : 0..1</div>
+  <div class="jarrow"><span>session_id</span><i></i></div>
   <div class="jbox"><div class="n">signups</div><div class="g">7,338 leads, one product each</div></div>
-  <div class="jarrow"><span>lead_id</span><i></i>1 : 0..1</div>
+  <div class="jarrow"><span>lead_id</span><i></i></div>
   <div class="jbox"><div class="n">opportunities</div><div class="g">1,495 closed deals</div></div>
 </div>
 <div class="tbl"><table class="txt"><thead><tr><th>Check</th><th>Result</th><th>Read</th></tr></thead><tbody><tr><td>Signups that find their session</td><td>7,313 / 7,338 (99.7%)</td><td>25 have malformed session ids (R8)</td></tr><tr><td>Matched signup sessions with converted_flag = 1</td><td>7,313 / 7,313 (100%)</td><td>Confirms what converted_flag means</td></tr><tr><td>Flagged sessions with no signup</td><td>25</td><td>Same count as the malformed signup keys: the other side of the same break</td></tr><tr><td>Signup on the same day as its session</td><td>7,313 / 7,313 (100%)</td><td>After R7. No attribution window needed</td></tr><tr><td>visitor_id agrees between tables</td><td>7,310 / 7,313 (99.96%)</td><td>3 mismatches; not used for joins</td></tr><tr><td>Channel agrees between tables</td><td>7,313 / 7,313 (100.0%)</td><td>After R1</td></tr><tr><td>Geo agrees between tables</td><td>7,265 / 7,265 (100.0%)</td><td>Where both sides are known (R14)</td></tr><tr><td>Opportunities that find their lead</td><td>1,480 / 1,495 (99.0%)</td><td>15 have malformed lead ids (R13)</td></tr><tr><td>Opportunities per lead</td><td>max 1</td><td>1:1, no fan-out on join</td></tr><tr><td>Deals closed before their signup</td><td>0</td><td>After R7 and R12</td></tr></tbody></table></div>
