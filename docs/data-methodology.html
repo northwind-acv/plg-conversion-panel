@@ -163,11 +163,28 @@ code { font-family:ui-monospace,Menlo,monospace; font-size:0.9em; }
 <div class="tbl"><table class=""><thead><tr><th>Close month</th><th>Paying customers</th><th>All closed opps (incl. $0)</th><th>New deal value</th></tr></thead><tbody><tr><td>Jan</td><td>168</td><td>173</td><td>$8,955</td></tr><tr><td>Feb</td><td>313</td><td>318</td><td>$16,580</td></tr><tr><td>Mar</td><td>316</td><td>322</td><td>$15,485</td></tr><tr><td>Apr</td><td>228</td><td>235</td><td>$11,880</td></tr><tr><td>May</td><td>177</td><td>181</td><td>$10,095</td></tr><tr><td>Jun</td><td>161</td><td>164</td><td>$9,385</td></tr><tr><td>Jul</td><td>102</td><td>102</td><td>$5,670</td></tr></tbody></table></div>
 <p class="note-foot">July closes come from June signups (the opportunity extract runs to Jul 26). Includes 15 opportunities whose lead_id doesn't match any signup.</p>
 
-<h2>5. Assumptions and why they're safe</h2>
+<h2>5. Assumptions</h2>
+<p>Where the data was ambiguous, these are the calls we made and why they're reasonable.</p>
+<h3>About the data</h3>
 <ul>
-  <li><b>30-day window.</b> No deal in the extract closes more than 29 days after signup, so a 30-day window loses nothing in this extract (see section 6). Opportunities run to Jul 26; the 166 signups after Jun 26 have a slightly shorter window. With a 29-day maximum, the impact is a handful of deals in late June.</li>
-  <li><b>$0 deals excluded.</b> 30 of 1,495 deals, spread evenly across months. Including them doesn't change any trend (see the reconciliation with the finance view in section 4).</li>
-  <li><b>Orphan rows kept, not invented.</b> We don't guess the true keys of the 25 signups and 15 deals with broken ids. They stay in the totals they can support and out of the cuts they can't.</li>
+  <li><b>The extract is complete.</b> No months or deals are missing beyond what the cleaning rules fix. Whether deals are capped at 30 days is worth confirming (section 6).</li>
+  <li><b><code>product_code</code> is the SKU the lead chose at signup, and <code>plan</code> is what they bought.</b> Free CRM upgrades show up as Starter deals, so the two fields can't be the same thing.</li>
+  <li><b><code>amount</code> is the deal's list price ($35 Starter, $110 Pro).</b> We call it deal value, not revenue or MRR, because the data doesn't say whether it's monthly or annual.</li>
+  <li><b>A signup's <code>session_id</code> is the visit where it happened.</b> All matched signups fall on the same day as their session, so channel, entry page and device come from that visit (last touch).</li>
+  <li><b>Outliers are recording errors, not real values.</b> July signup dates, 1,000× amounts and negative days to close all have a clear fix that matches the rest of the data.</li>
+  <li><b>Broken ids aren't recovered.</b> We don't guess the true keys of the 25 signups and 15 deals with broken ids. They stay in the totals they can support and out of the cuts they can't.</li>
+</ul>
+<h3>About the metrics</h3>
+<ul>
+  <li><b>A paying customer is a deal above $0 closed within 30 days of signup.</b> No deal in the extract closes after day 29, so the window loses nothing. The 166 signups after Jun 26 have a slightly shorter window; the impact is a handful of deals.</li>
+  <li><b>$0 deals aren't paying customers.</b> 30 of 1,495 deals, spread evenly across months. Including them doesn't change any trend (see the reconciliation with the finance view in section 4).</li>
+  <li><b>Q1 vs Q2 as monthly averages by signup month.</b> Comparing cohorts ties every outcome to the SKU the person chose.</li>
+</ul>
+<h3>About the analysis</h3>
+<ul>
+  <li><b>The Free CRM launch is the main change on Apr 1.</b> The brief says it became the primary call-to-action that day, and prices didn't change during the period. We can't rule out other changes we don't see in the data, but the drop happens in a single step that week, across every slice.</li>
+  <li><b>Free CRM's ~5% is its 30-day conversion.</b> The ~21% break-even compares against that number; its longer-term conversion could be higher (section 6).</li>
+  <li><b>We can't split the signup growth between Free CRM and traffic.</b> Both changed in the same period; the 271 net new signups a month are an upper bound for what Free CRM added.</li>
 </ul>
 
 <h2>6. What the data can't tell us</h2>
