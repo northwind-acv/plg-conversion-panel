@@ -168,7 +168,6 @@ code { font-family:ui-monospace,Menlo,monospace; font-size:0.9em; }
   <li><b>$0 deals excluded.</b> 30 of 1,495 deals, spread evenly across months. Including them doesn't change any trend (see the finance view in the analysis).</li>
   <li><b>Orphan rows kept, not invented.</b> We don't guess the true keys of the 25 signups and 15 deals with broken ids. They stay in the totals they can support and out of the cuts they can't.</li>
   <li><b>January in the finance view.</b> Some January closes come from December signups, which aren't in the data, so January close-month counts are low. Cohort views aren't affected.</li>
-  <li><b>Free CRM in the decomposition.</b> Free CRM has no Q1 conversion rate. The Kitagawa split uses its Q2 rate for both periods, which puts its whole effect in the mix term.</li>
 </ul>
 
 <h2>6. What the data can't tell us</h2>
@@ -181,7 +180,7 @@ code { font-family:ui-monospace,Menlo,monospace; font-size:0.9em; }
 </ul>
 
 <h2>7. Reproduce it</h2>
-<p>The queries are written in Snowflake SQL against the <code>sessions</code>, <code>signups</code> and <code>opportunities</code> tables. Run them in order: <a href="https://github.com/northwind-acv/sfdc-plg-panel/tree/main/sql">01_clean, 02_funnel, 03_decomposition</a>. To run locally in DuckDB, run <code>00_load_raw.sql</code> first to load the CSVs.</p>
+<p>The queries are written in Snowflake SQL against the <code>sessions</code>, <code>signups</code> and <code>opportunities</code> tables. Run them in order: <a href="https://github.com/northwind-acv/sfdc-plg-panel/tree/main/sql">01_clean, 02_funnel</a>. To run locally in DuckDB, run <code>00_load_raw.sql</code> first to load the CSVs.</p>
 </main>
 </body>
 </html>
