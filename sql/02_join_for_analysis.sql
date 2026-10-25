@@ -1,6 +1,6 @@
--- 02_funnel.sql
+-- 02_join_for_analysis.sql
 -- Queries to join the cleaned datasets for analysis
--- Runs on top of 01_clean.sql.
+-- Runs on top of 01_clean_raw_data.sql.
 
 
 -- Signup outcomes: one row per signup with where it came from and whether it paid ----

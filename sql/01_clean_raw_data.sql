@@ -1,4 +1,4 @@
--- 01_clean.sql
+-- 01_clean_raw_data.sql
 -- Queries to clean the raw datasets (sessions, signups, opportunities)
 --
 -- Data fixes:
