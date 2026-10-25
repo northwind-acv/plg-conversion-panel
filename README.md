@@ -2,7 +2,7 @@
 
 Repo for the take-home case: why paying customers are down while signups are up.
 
-- [Analysis](https://northwind-acv.github.io/plg-conversion-panel/analysis.html)
+- [Analysis](https://northwind-acv.github.io/sfdc-plg-panel/analysis.html)
 - [Deck](DECK_LINK)
-- [Data and methodology](https://northwind-acv.github.io/plg-conversion-panel/data-methodology.html)
+- [Data and methodology](https://northwind-acv.github.io/sfdc-plg-panel/data-methodology.html)
 - [Queries](sql/)
