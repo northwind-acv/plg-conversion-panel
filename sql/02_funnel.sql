@@ -1,5 +1,43 @@
 -- 02_funnel.sql
--- Funnel tables used in the analysis. Runs on top of 01_clean.sql.
+-- Joins the clean tables into signup_outcomes and builds the funnel tables used in the analysis.
+-- Runs on top of 01_clean.sql.
+
+
+-- Signup outcomes: one row per signup with where it came from and whether it paid ----
+
+CREATE OR REPLACE TABLE signup_outcomes AS
+WITH first_visit AS (
+    SELECT visitor_id, MIN(event_dt) AS first_visit_dt
+    FROM sessions_clean
+    WHERE visitor_id IS NOT NULL
+    GROUP BY visitor_id
+),
+paid_deals AS (
+    SELECT * FROM opportunities_clean WHERE is_zero_amount = 0
+)
+SELECT
+    g.*,
+    CAST(DATE_TRUNC('month', g.created_dt) AS DATE) AS signup_month,
+    CASE WHEN g.created_dt < DATE '2026-04-01' THEN 'Q1' ELSE 'Q2' END AS period,
+    s.device_type,
+    s.page_type,
+    CASE WHEN fv.first_visit_dt < g.created_dt THEN 'Returning' ELSE 'New' END AS visitor_type,
+    CASE
+        WHEN g.company_size IS NULL THEN 'Unknown'
+        WHEN g.company_size <= 10   THEN '1-10'
+        WHEN g.company_size <= 50   THEN '11-50'
+        WHEN g.company_size <= 200  THEN '51-200'
+        ELSE '201+'
+    END AS company_size_bucket,
+    o.plan   AS won_plan,
+    o.amount AS won_amount,
+    o.days_to_close,
+    -- Win = paid deal closed within 30 days of signup
+    CASE WHEN o.opp_id IS NOT NULL AND o.days_to_close <= 30 THEN 1 ELSE 0 END AS is_win
+FROM signups_clean g
+LEFT JOIN sessions_clean s ON s.session_id = g.session_id
+LEFT JOIN first_visit fv   ON fv.visitor_id = g.visitor_id
+LEFT JOIN paid_deals o     ON o.lead_id = g.lead_id;
 
 
 -- Monthly funnel: sessions -> signups -> wins -> deal value ----------------
