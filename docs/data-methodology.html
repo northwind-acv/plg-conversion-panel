@@ -162,10 +162,6 @@ code { font-family:ui-monospace,Menlo,monospace; font-size:0.9em; }
   <li><b>New vs returning:</b> returning = the visitor had a session on an earlier day than the signup.</li>
 </ul>
 
-<h3>Reconciliation with the finance view</h3><p>Finance counts customers by the month the deal closed; this analysis counts them by the month the customer signed up. The monthly numbers differ but tell the same story. January close-month counts are low because some January closes come from December signups, which aren't in the data.</p>
-<div class="tbl"><table class=""><thead><tr><th>Close month</th><th>Paying customers</th><th>All closed opps (incl. $0)</th><th>New deal value</th></tr></thead><tbody><tr><td>Jan</td><td>168</td><td>173</td><td>$8,955</td></tr><tr><td>Feb</td><td>313</td><td>318</td><td>$16,580</td></tr><tr><td>Mar</td><td>316</td><td>322</td><td>$15,485</td></tr><tr><td>Apr</td><td>228</td><td>235</td><td>$11,880</td></tr><tr><td>May</td><td>177</td><td>181</td><td>$10,095</td></tr><tr><td>Jun</td><td>161</td><td>164</td><td>$9,385</td></tr><tr><td>Jul</td><td>102</td><td>102</td><td>$5,670</td></tr></tbody></table></div>
-<p class="note-foot">July closes come from June signups (the opportunity extract runs to Jul 26). Includes 15 opportunities whose lead_id doesn't match any signup.</p>
-
 <h2>5. Assumptions and why they're safe</h2>
 <ul>
   <li><b>30-day window.</b> No deal in the extract closes more than 29 days after signup, so a 30-day window loses nothing. Opportunities run to Jul 26; the 166 signups after Jun 26 have a slightly shorter window. With a 29-day maximum, the impact is a handful of deals in late June.</li>
